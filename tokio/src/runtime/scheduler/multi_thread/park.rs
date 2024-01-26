@@ -9,6 +9,7 @@ use crate::util::TryLock;
 
 use std::sync::atomic::Ordering::SeqCst;
 use std::time::Duration;
+use std::hint::black_box;
 
 pub(crate) struct Parker {
     inner: Arc<Inner>,
@@ -71,7 +72,7 @@ impl Parker {
         // Only parking with zero is supported...
         assert_eq!(duration, Duration::from_millis(0));
 
-        if let Some(mut driver) = self.inner.shared.driver.try_lock() {
+        if let Some(mut driver) = black_box(self.inner.shared.driver.try_lock()) {
             driver.park_timeout(handle, duration);
         }
     }
